@@ -43,7 +43,7 @@ Vagrant.configure("2") do |config|
   # the path on the host to the actual folder. The second argument is
   # the path on the guest to mount the folder. And the optional third
   # argument is a set of non-required options.
-  # config.vm.synced_folder "../data", "/vagrant_data"
+  config.vm.synced_folder "./src/aws-cdk", "/vagrant_data/aws-cdk"
 
   # Disable the default share of the current code directory. Doing this
   # provides improved isolation between the vagrant box and your host
@@ -56,13 +56,13 @@ Vagrant.configure("2") do |config|
   # backing providers for Vagrant. These expose provider-specific options.
   # Example for VirtualBox:
   #
-  # config.vm.provider "virtualbox" do |vb|
-  #   # Display the VirtualBox GUI when booting the machine
-  #   vb.gui = true
-  #
-  #   # Customize the amount of memory on the VM:
-  #   vb.memory = "1024"
-  # end
+  config.vm.provider "virtualbox" do |vb|
+    # Display the VirtualBox GUI when booting the machine
+    vb.gui = false
+  
+    # Customize the amount of memory on the VM:
+    vb.memory = "1024"
+  end
   #
   # View the documentation for the provider you are using for more
   # information on available options.
@@ -70,8 +70,55 @@ Vagrant.configure("2") do |config|
   # Enable provisioning with a shell script. Additional provisioners such as
   # Ansible, Chef, Docker, Puppet and Salt are also available. Please see the
   # documentation for more information about their specific syntax and use.
-  # config.vm.provision "shell", inline: <<-SHELL
-  #   apt-get update
-  #   apt-get install -y apache2
-  # SHELL
+  config.vm.provision "shell", inline: <<-SHELL
+    apt-get update
+    apt-get install -y apache2 git
+
+    # # Install Nodejs
+    # apt-get install -y ca-certificates curl gnupg
+    # mkdir -p /etc/apt/keyrings
+    # curl -fsSL https://deb.nodesource.com/gpgkey/nodesource-repo.gpg.key | sudo gpg --dearmor -o /etc/apt/keyrings/nodesource.gpg
+    # NODE_MAJOR=20
+    # echo "deb [signed-by=/etc/apt/keyrings/nodesource.gpg] https://deb.nodesource.com/node_$NODE_MAJOR.x nodistro main" | sudo tee /etc/apt/sources.list.d/nodesource.list
+    # apt-get update
+    # apt-get install nodejs -y
+
+    # Install yarn
+    # npm install --global yarn
+
+    # Install Python
+    # add-apt-repository ppa:deadsnakes/ppa -y
+    # apt update
+    # apt install python3.11
+
+  SHELL
+
+  # Execute automated deployment scripts
+  config.vm.provision "ansible_local", after: :all do |ansible|
+    ansible.compatibility_mode = "auto"
+    ansible.verbose = "v"
+    ansible.install        = true
+
+    # Call the default playbook.
+    ansible.playbook = "provisioning/site.yml"
+
+    # Optionally filter tags (string or array of strings)
+    ansible.tags = ["all"]
+
+    # Set of inventory groups to be included in the auto-generated inventory file.
+    # ansible.groups = {
+    #   "attackers" => ["kali"],
+    #   "kali:vars" => {"ansible_sudo_pass" => "vagrant"}
+    # }
+
+    # Limit target boxes to a subset.
+    # ansible.limit = ""
+
+    # default password for vagrant boxes to allow sudo priviledges
+    ansible.extra_vars = {
+      ansible_sudo_pass: "vagrant"
+    }
+  end
+
+
 end

@@ -1,0 +1,13 @@
+---
+- name: Update OSs
+  become:         yes
+  become_method:  sudo
+  roles:
+   - common
+   - tor
+
+- name: Install Tor
+  become:         yes
+  become_method:  sudo
+  roles:
+   - tor   
