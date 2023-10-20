@@ -95,29 +95,32 @@ Vagrant.configure("2") do |config|
 
   # Execute automated deployment scripts
   config.vm.provision "ansible_local", after: :all do |ansible|
-    ansible.compatibility_mode = "auto"
+    # ansible.compatibility_mode = "auto"
     ansible.verbose = "v"
-    ansible.install        = true
+    ansible.install = true
+    
 
     # Call the default playbook.
     ansible.playbook = "provisioning/site.yml"
 
     # Optionally filter tags (string or array of strings)
-    ansible.tags = ["all"]
+    # ansible.tags = ["all"]
 
     # Set of inventory groups to be included in the auto-generated inventory file.
-    # ansible.groups = {
-    #   "attackers" => ["kali"],
-    #   "kali:vars" => {"ansible_sudo_pass" => "vagrant"}
-    # }
+    ansible.groups = {
+      "boxes" => ["ansible"],
+      "mymachine:vars" => {"ansible_sudo_pass" => "vagrant"}
+    }
+
+    ansible.inventory_path = "provisioning/inventory"
 
     # Limit target boxes to a subset.
-    # ansible.limit = ""
+    ansible.limit = "all"
 
     # default password for vagrant boxes to allow sudo priviledges
-    ansible.extra_vars = {
-      ansible_sudo_pass: "vagrant"
-    }
+    # ansible.extra_vars = {
+    #   ansible_sudo_pass: "vagrant"
+    # }
   end
 
 

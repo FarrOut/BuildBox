@@ -1,5 +1,6 @@
 ---
 - name: Update OSs
+  hosts: all
   become:         yes
   become_method:  sudo
   roles:
@@ -7,6 +8,7 @@
    - tor
 
 - name: Install Tor
+  hosts: all
   become:         yes
   become_method:  sudo
   roles:
